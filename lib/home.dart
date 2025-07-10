@@ -16,8 +16,8 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
 
   StreamSubscription? _subscription;
-  bool start = false;
   bool isConnected = false;
+  bool reading = false;
   WebSocketChannel? channel;
   TextEditingController ip = TextEditingController();
 
@@ -26,8 +26,8 @@ class _HomePageState extends State<HomePage> {
   int currentIndex = 0; // Used for X-axis tracking
 
   // Define the min and max Y-axis values
-  double minY = 0;
-  double maxY = 1023;
+  double minY = -100;
+  double maxY = 4196;
 
   @override
   void initState() {
@@ -42,30 +42,35 @@ class _HomePageState extends State<HomePage> {
       final newChannel = WebSocketChannel.connect(fullUri);
       newChannel.stream.listen(
         (data) {
-          if (start) {
             var parsedData = jsonDecode(data);
             String valueString = parsedData['value'];
-            int sensorValue = int.parse(valueString);
+            if(valueString == "-"){
+              setState(() {
+                reading = false;
+              });
+              
+            } else{
+              int sensorValue = int.parse(valueString);
+              setState(() {
+                if(!reading) reading = true;
+                sensorData = sensorValue.toString();
+                sensorValues.add(SensorValue(
+                  timestamp: DateTime.now(),
+                  value: sensorValue.toDouble(),
+                ));
+              });
 
-            setState(() {
-              sensorData = sensorValue.toString();
-              sensorValues.add(SensorValue(
-                timestamp: DateTime.now(),
-                value: sensorValue.toDouble(),
-              ));
-            });
-          }
+            }
+            
         },
         onDone: () {
           setState(() {
             isConnected = false;
-            start = false;
           });
         },
         onError: (error) {
           setState(() {
             isConnected = false;
-            start = false;
           });
           debugPrint("WebSocket error: $error");
         },
@@ -81,20 +86,6 @@ class _HomePageState extends State<HomePage> {
         isConnected = false;
       });
     }
-  }
-
-
-  void startDataCollection() {
-    setState(() {
-      start = true;
-    });
-  }
-
-
-  void stopDataCollection() {
-    setState(() {
-      start = false;
-    });
   }
 
   @override
@@ -203,29 +194,25 @@ class _HomePageState extends State<HomePage> {
               padding: const EdgeInsets.all(10.0),
               child: ElevatedButton(
                 onPressed: () {
-                  if (!isConnected) return;
-              
-                  if (start) {
-                    stopDataCollection();
-                  } else {
-                    startDataCollection();
-                  }
+                  sensorValues.clear();
                 },
-                child: Text(start ? "Stop" : "Start"),
+                child: Text('Clear'),
               ),
             ),
-            ElevatedButton(
-              onPressed: () async {
-                final pdfData = await PdfService().generateSensorGraphReport(sensorValues);
+            Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: ElevatedButton(
+                onPressed: () async {
+                  final pdfData = await PdfService().generateSensorGraphReport(sensorValues);
 
-                await PdfService().sharePdf(pdfData, 'EMG Data.pdf');
-                // await Printing.layoutPdf(
-                //   onLayout: (_) async => pdfData,
-                // );
-              },
-              child: Text('Save Chart to PDF'),
+                  await PdfService().sharePdf(pdfData, 'EMG Data.pdf');
+                  // await Printing.layoutPdf(
+                  //   onLayout: (_) async => pdfData,
+                  // );
+                },
+                child: Text('Save Chart to PDF'),
+              ),
             ),
-
 
           ],
         ),
