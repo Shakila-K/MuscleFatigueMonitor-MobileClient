@@ -6,14 +6,14 @@ import 'package:muscle_fatigue_monitor/models/sensor_value.dart';
 import 'package:muscle_fatigue_monitor/services/pdf_service.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({super.key});
+class HomePage2 extends StatefulWidget {
+  const HomePage2({super.key});
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<HomePage2> createState() => _HomePage2State();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePage2State extends State<HomePage2> {
 
   StreamSubscription? _subscription;
   bool isConnected = false;
@@ -54,10 +54,10 @@ class _HomePageState extends State<HomePage> {
               setState(() {
                 if(!reading) reading = true;
                 sensorData = sensorValue.toString();
-                sensorValues.add(SensorValue(
-                  timestamp: DateTime.now(),
-                  value: sensorValue.toDouble(),
-                ));
+                // sensorValues.add(SensorValue(
+                //   timestamp: DateTime.now(),
+                //   value: sensorValue.toDouble(),
+                // ));
               });
 
             }
@@ -98,13 +98,14 @@ class _HomePageState extends State<HomePage> {
 
 
   List<FlSpot> _getLastSpots(int count) {
-    if (sensorValues.isEmpty) return [];
-    int start = sensorValues.length > count ? sensorValues.length - count : 0;
-    final baseTime = sensorValues[start].timestamp.millisecondsSinceEpoch.toDouble();
-    return sensorValues.sublist(start).map((e) {
-      double x = (e.timestamp.millisecondsSinceEpoch - baseTime) / 1000.0; // X in seconds
-      return FlSpot(x, e.value);
-    }).toList();
+    // if (sensorValues.isEmpty) return [];
+    // int start = sensorValues.length > count ? sensorValues.length - count : 0;
+    // final baseTime = sensorValues[start].timestamp.millisecondsSinceEpoch.toDouble();
+    // return sensorValues.sublist(start).map((e) {
+    //   double x = (e.timestamp.millisecondsSinceEpoch - baseTime) / 1000.0; // X in seconds
+    //   return FlSpot(x, e.value);
+    // }).toList();
+    return List.empty();
   }
 
   double _getMinX(int count) {
