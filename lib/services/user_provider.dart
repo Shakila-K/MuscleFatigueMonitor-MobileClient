@@ -110,4 +110,17 @@ class UserProvider extends ChangeNotifier {
     _currentUser = null;
     notifyListeners();
   }
+
+  /// Delete a user by userId
+  Future<void> deleteUser(int userId) async {
+    final box = Hive.box<UserModel>(_boxName);
+    await box.delete(userId);
+
+    // If the deleted user was the current user, clear it
+    if (_currentUser?.userId == userId) {
+      _currentUser = null;
+    }
+
+    notifyListeners();
+  }
 }

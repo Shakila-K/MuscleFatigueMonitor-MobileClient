@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:muscle_fatigue_monitor/consts/colors.dart';
 import 'package:muscle_fatigue_monitor/models/user_model.dart';
 import 'package:muscle_fatigue_monitor/screens/add_user.dart';
+import 'package:muscle_fatigue_monitor/screens/user_screen.dart';
 import 'package:muscle_fatigue_monitor/services/user_provider.dart';
 import 'package:provider/provider.dart';
 
@@ -63,9 +64,11 @@ class UsersScreen extends StatelessWidget {
                   ),
                   minVerticalPadding: 15,
                   selected: userProvider.user?.userId == users[index].userId,
+                  selectedTileColor: AppColors().appGrey.withAlpha(40),
                   onTap: () {
-                    userProvider.getUser(users[index].userId);
-                    Navigator.of(context).pop();
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context) => UserScreen(user: users[index])),
+                    );
                   },
                 );
               },
