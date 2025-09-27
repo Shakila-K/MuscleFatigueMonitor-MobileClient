@@ -3,27 +3,23 @@ import 'package:flutter/material.dart';
 import 'package:muscle_fatigue_monitor/consts/colors.dart';
 import 'package:muscle_fatigue_monitor/consts/screen_size.dart';
 import 'package:muscle_fatigue_monitor/models/sensor_value.dart';
-import 'package:muscle_fatigue_monitor/services/websocket_service.dart';
+import 'package:muscle_fatigue_monitor/services/websocket_provider.dart';
 import 'package:muscle_fatigue_monitor/widgets/button_long.dart';
 import 'package:muscle_fatigue_monitor/widgets/emg_graph.dart';
 import 'package:muscle_fatigue_monitor/widgets/graph_data_info.dart';
 import 'package:provider/provider.dart';
 import 'package:toastification/toastification.dart';
 
-class RecordData extends StatefulWidget {
-  final String title;
-  final bool recordThreshold;
-  const RecordData({
+class RecordThreshold extends StatefulWidget {
+  const RecordThreshold({
     super.key,
-    required this.title,
-    required this.recordThreshold
   });
 
   @override
-  State<RecordData> createState() => _RecordDataState();
+  State<RecordThreshold> createState() => _RecordThresholdState();
 }
 
-class _RecordDataState extends State<RecordData> {
+class _RecordThresholdState extends State<RecordThreshold> {
 
   List<SensorValue> sensorValues = [];
   List<double> thresholds = [];
@@ -83,6 +79,7 @@ class _RecordDataState extends State<RecordData> {
       if(!stopwatch.isRunning){
         stopwatch.reset();
         stopwatch.start();
+        showSaveDiscard = false;
         sensorValues.clear();
       }
       sensorValues.add(SensorValue(timestamp: stopwatch.elapsed, value: ws.latestValue.toDouble()));
@@ -97,7 +94,7 @@ class _RecordDataState extends State<RecordData> {
     
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text("Record Threshold"),
         backgroundColor: AppColors().backgroundBlack,
         automaticallyImplyLeading: true,
         foregroundColor: AppColors().appWhite,
@@ -116,7 +113,8 @@ class _RecordDataState extends State<RecordData> {
 
               Column(
                 children: [
-                  if(widget.recordThreshold && !recording)
+                  
+                  if(!recording)
                     Text("Your EMG data will be recorded 3 times in order to get an average threshold value."),
 
                   (!recording) ?
@@ -153,8 +151,7 @@ class _RecordDataState extends State<RecordData> {
                 ],
               ),
 
-              if(widget.recordThreshold)
-                Text("Threshold recorded $recordCount/3 time(s)"),
+              Text("Threshold recorded $recordCount/3 time(s)"),
           
               Container(
                 padding: EdgeInsets.all(10),
@@ -207,7 +204,7 @@ class _RecordDataState extends State<RecordData> {
                   }
                 ),
               // if(recording && !ws.isReading && sensorValues.isNotEmpty && !doneRecording)
-              if(showSaveDiscard && !doneRecording)
+              if(showSaveDiscard)
                 Row(
                   children: [
                     Expanded(
@@ -237,12 +234,10 @@ class _RecordDataState extends State<RecordData> {
                         backgroundColor: AppColors().appGreen,
                         onPressed: (){
                           showSaveDiscard = false;
-                          if(widget.recordThreshold) {
-                            recordCount ++;
-                            getMax();
-                            if(recordCount>=3) doneRecording = true;
-                            debugPrint(thresholds.toString());
-                          }
+                          recordCount ++;
+                          getMax();
+                          if(recordCount>=3) doneRecording = true;
+                          debugPrint(thresholds.toString());
                         }
                       ),
                     )

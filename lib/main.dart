@@ -1,14 +1,23 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
+import 'package:muscle_fatigue_monitor/models/user_model.dart';
 import 'package:muscle_fatigue_monitor/screens/homepage.dart';
-import 'package:muscle_fatigue_monitor/services/websocket_service.dart';
+import 'package:muscle_fatigue_monitor/services/user_provider.dart';
+import 'package:muscle_fatigue_monitor/services/websocket_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:toastification/toastification.dart';
 
 
 final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
-void main() {
+void main() async{
+
+  WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();
+  Hive.registerAdapter(UserModelAdapter());
+  await Hive.openBox<UserModel>('users');
+
   FlutterError.onError = (FlutterErrorDetails details) {
     FlutterError.dumpErrorToConsole(details);
   };
@@ -16,8 +25,11 @@ void main() {
   runZonedGuarded(
     () {
       runApp(
-        ChangeNotifierProvider(
-          create: (_) => WebSocketProvider(),
+        MultiProvider(
+          providers: [
+              ChangeNotifierProvider( create: (_) => WebSocketProvider()),
+              ChangeNotifierProvider(create: (_) => UserProvider()),
+            ],
           child: const MyApp(),
         ),
       );
@@ -44,6 +56,7 @@ class MyApp extends StatelessWidget {
         navigatorKey: navigatorKey,
         home: const HomePage(),
         theme: ThemeData.dark(),
+        debugShowCheckedModeBanner: false,
       ),
     );
   }

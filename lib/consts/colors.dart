@@ -1,4 +1,4 @@
-import 'package:flutter/painting.dart';
+import 'package:flutter/material.dart';
 
 class AppColors {
 
@@ -8,7 +8,7 @@ class AppColors {
   Color appRed = Color.fromRGBO(255, 49, 47, 1);
   Color appYellow = Color.fromRGBO(235, 215, 80, 1);
   Color appWhite = Color.fromRGBO(250, 250, 250, 1);
-  Color appGrey = Color.fromRGBO(160, 160, 160, 1);
+  Color appGrey = Colors.white70;
   Color appBlack = Color(0xff333333);
 
 }

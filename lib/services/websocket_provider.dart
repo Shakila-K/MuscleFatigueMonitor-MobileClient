@@ -38,15 +38,6 @@ class WebSocketProvider extends ChangeNotifier {
       _showToastSafe("Connected to $ipAddress (waiting for data...)", ToastificationType.success);
       notifyListeners();
 
-      // // Timeout if no data in 5 seconds
-      // Timer(const Duration(seconds: 15), () {
-      //   if (!isConnected && isConnecting && !_manualDisconnect) {
-      //     debugPrint("Connection timeout, no data received.");
-      //     _showToastSafe("Connection timeout, no data received.", ToastificationType.error);
-      //     disconnect(true);
-      //   }
-      // });
-
       _channel!.stream.listen(
         (data) {
           if (!isConnected) {

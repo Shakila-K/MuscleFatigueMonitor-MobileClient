@@ -2,8 +2,10 @@
 import 'package:flutter/material.dart';
 import 'package:muscle_fatigue_monitor/consts/colors.dart';
 import 'package:muscle_fatigue_monitor/consts/screen_size.dart';
-import 'package:muscle_fatigue_monitor/screens/record_data.dart';
-import 'package:muscle_fatigue_monitor/services/websocket_service.dart';
+import 'package:muscle_fatigue_monitor/screens/record_threshold.dart';
+import 'package:muscle_fatigue_monitor/screens/users_screen.dart';
+import 'package:muscle_fatigue_monitor/services/user_provider.dart';
+import 'package:muscle_fatigue_monitor/services/websocket_provider.dart';
 import 'package:muscle_fatigue_monitor/widgets/button_long.dart';
 import 'package:provider/provider.dart';
 import 'package:toastification/toastification.dart';
@@ -51,6 +53,7 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
 
     final ws = context.watch<WebSocketProvider>();
+    final userProvider = context.watch<UserProvider>();
 
     Future<void> connectDeviceDialog() async {
     return showDialog<void>(
@@ -170,44 +173,66 @@ class _HomePageState extends State<HomePage> {
               ),
               width: 80,
               height: 80,
-              child: ElevatedButton(
-                onPressed: () async {
-                    if(ws.isConnected){
-                        ws.disconnect(false);
-                    } else if(!ws.isConnected || !ws.isConnecting) {
-                      connectDeviceDialog();
-                    }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors().appGrey.withAlpha(20),
-                  overlayColor: AppColors().appGrey.withAlpha(50),
-                ),
-                child: Image.asset(ws.isConnected ? "assets/icons/link.png" : "assets/icons/unlink.png", 
-                  color: AppColors().appBlue.withAlpha(200),
-                ),
-              ),
+              child: IconButton(
+                icon: Icon(userProvider.hasCurrentUser() ? Icons.person : Icons.person_off),
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => UsersScreen())
+                  );
+                }, 
+              )
             ),
-
-            if(ws.isConnecting || ws.retryCount!=0) 
             Padding(
-              padding: const EdgeInsets.only(top: 20.0),
-              child: SizedBox(
-                width: 20,
-                height: 20,
-                child: CircularProgressIndicator(
-                  color: AppColors().appWhite,
-                )
+              padding: const EdgeInsets.symmetric(vertical: 20.0),
+              child: Text(userProvider.user != null ? "User ID: ${userProvider.user!.userId}, ${userProvider.user!.gender}" : "No user selected",
+                style: TextStyle(
+                  color: AppColors().appGrey,
+                ),
               ),
             ),
 
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 20.0),
-              child: Text(ws.isConnected ? "Device connected" : "Device not connected",
-                style: TextStyle(
-                  color: AppColors().appGrey
-                ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(ws.isConnected ? "Device connected." : "Device not connected.",
+                    style: TextStyle(
+                      color: AppColors().appGrey
+                    ),
+                  ),
+              
+                  TextButton(
+                    onPressed: () async {
+                          if(ws.isConnected){
+                              ws.disconnect(false);
+                          } else if(!ws.isConnected || !ws.isConnecting) {
+                            connectDeviceDialog();
+                          }
+                      }, 
+                    child: Text(ws.isConnected ? "Disconnect?" : "Connect?",
+                      style: TextStyle(
+                        color: AppColors().appWhite
+                      ),
+                    )
+                  ),
+              
+                  if(ws.isConnecting || ws.retryCount!=0) 
+                  Padding(
+                    padding: const EdgeInsets.only(left: 20.0),
+                    child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        color: AppColors().appWhite,
+                      )
+                    ),
+                  ),
+                ],
               ),
             ),
+
+            
 
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 40.0),
@@ -232,9 +257,21 @@ class _HomePageState extends State<HomePage> {
                       animationDuration: const Duration(milliseconds: 300),
                       autoCloseDuration: const Duration(seconds: 3),
                     );
-                  } else{
+                  } else if(!userProvider.hasCurrentUser()){
+                    toastification.dismissAll();
+                    toastification.show(
+                      context: context,
+                      title: Text('User not selected!'),
+                      description: Text("Please select a user and try again."),
+                      type: ToastificationType.error,
+                      style: ToastificationStyle.fillColored,
+                      alignment: Alignment.bottomCenter,
+                      animationDuration: const Duration(milliseconds: 300),
+                      autoCloseDuration: const Duration(seconds: 3),
+                    );
+                  }else{
                     Navigator.of(context).push(
-                      MaterialPageRoute(builder: (context) => RecordData(title: "Record Threshold", recordThreshold: true,))
+                      MaterialPageRoute(builder: (context) => RecordThreshold())
                     );
                   }
                 },
