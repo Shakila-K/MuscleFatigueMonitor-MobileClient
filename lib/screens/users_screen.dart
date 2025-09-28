@@ -55,9 +55,9 @@ class UsersScreen extends StatelessWidget {
                       ),
                       Row(
                         children: [
-                          Text("Threshold : ${users[index].threshold == 0 ? "N/A" : users[index].threshold}", style: TextStyle(color: AppColors().appGrey),),
+                          Text("ARV : ${users[index].arv == 0 ? "N/A" : users[index].arv.toStringAsFixed(2)}", style: TextStyle(color: AppColors().appGrey),),
                           SizedBox(width: 20,),
-                          Text("MFI : ${users[index].mfi == 0 ? "N/A" : users[index].mfi}", style: TextStyle(color: AppColors().appGrey),),
+                          Text("MFI : ${users[index].latestMfi == 0 ? "N/A" : users[index].latestMfi}", style: TextStyle(color: AppColors().appGrey),),
                         ],
                       )
                     ],

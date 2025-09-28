@@ -19,7 +19,7 @@ class EmgGraph extends StatelessWidget {
       int start = sensorValues.length > count ? sensorValues.length - count : 0;
       return sensorValues.sublist(start).map((e) {
         double x = (e.timestamp.inMilliseconds /1000);
-        return FlSpot(x, e.value);
+        return FlSpot(x, (e.value*1.0));
       }).toList();
     }
 

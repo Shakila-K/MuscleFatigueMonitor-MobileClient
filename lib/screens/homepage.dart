@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:muscle_fatigue_monitor/consts/colors.dart';
 import 'package:muscle_fatigue_monitor/consts/screen_size.dart';
-import 'package:muscle_fatigue_monitor/screens/record_threshold.dart';
+import 'package:muscle_fatigue_monitor/screens/record_arv.dart';
 import 'package:muscle_fatigue_monitor/screens/users_screen.dart';
 import 'package:muscle_fatigue_monitor/services/user_provider.dart';
 import 'package:muscle_fatigue_monitor/services/websocket_provider.dart';
@@ -243,7 +243,7 @@ class _HomePageState extends State<HomePage> {
                   height: 25,
                   child: Image.asset("assets/icons/button.png", color: AppColors().appWhite,)
                 ),
-                text: "Record Threshold",
+                text: "Record ARV",
                 onPressed: () {
                   if(!ws.isConnected){
                     toastification.dismissAll();
@@ -271,7 +271,41 @@ class _HomePageState extends State<HomePage> {
                     );
                   }else{
                     Navigator.of(context).push(
-                      MaterialPageRoute(builder: (context) => RecordThreshold())
+                      MaterialPageRoute(builder: (context) => RecordArv())
+                    );
+                  }
+                },
+              ),
+            ),
+
+            if(userProvider.user != null && userProvider.user!.arv != 0)
+            Padding(
+              padding: const EdgeInsets.only(bottom: 40.0),
+              child: ButtonLong(
+                prefix: Container(
+                  margin: EdgeInsets.only(right: 10),
+                  width: 25,
+                  height: 25,
+                  child: Image.asset("assets/icons/button.png", color: AppColors().appWhite,)
+                ),
+                backgroundColor: AppColors().appGreen,
+                text: "Record Muscle Fatigue",
+                onPressed: () {
+                  if(!ws.isConnected){
+                    toastification.dismissAll();
+                    toastification.show(
+                      context: context, // optional if you use ToastificationWrapper
+                      title: Text('Device not connected!'),
+                      description: Text("Please connect the EMG device and try again."),
+                      type: ToastificationType.error,
+                      style: ToastificationStyle.fillColored,
+                      alignment: Alignment.bottomCenter,
+                      animationDuration: const Duration(milliseconds: 300),
+                      autoCloseDuration: const Duration(seconds: 3),
+                    );
+                  } else{
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (context) => RecordArv())
                     );
                   }
                 },

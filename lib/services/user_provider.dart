@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:muscle_fatigue_monitor/models/sensor_value.dart';
 import 'package:muscle_fatigue_monitor/models/user_model.dart';
 
 class UserProvider extends ChangeNotifier {
@@ -27,6 +28,7 @@ class UserProvider extends ChangeNotifier {
     required String gender,
     required double weight,
     required double height,
+    required int age,
     double? mfi,
   }) async {
     final box = Hive.box<UserModel>(_boxName);
@@ -34,14 +36,13 @@ class UserProvider extends ChangeNotifier {
     final user = UserModel(
       userId: userId,
       gender: gender,
+      age: age,
       weight: weight,
       height: height,
-      tr1: 0,
-      tr2: 0,
-      tr3: 0,
-      threshold: 0.0,
-      reading: [],
-      mfi: mfi ?? 0.0,
+      arv: 0.0,
+      readings: [],
+      mfiSeries: [],
+      latestMfi: 0.0,
     );
 
     await box.put(userId, user);
@@ -70,12 +71,13 @@ class UserProvider extends ChangeNotifier {
     String? gender,
     double? weight,
     double? height,
-    int? tr1,
-    int? tr2,
-    int? tr3,
-    double? threshold,
-    List<int>? reading,
+    double? tr1,
+    double? tr2,
+    double? tr3,
+    double? arv,
+    List<SensorValue>? reading,
     double? mfi,
+    List<double>? mfiSeries,
   }) async {
     final box = Hive.box<UserModel>(_boxName);
     final user = box.get(userId);
@@ -84,14 +86,13 @@ class UserProvider extends ChangeNotifier {
       final updatedUser = UserModel(
         userId: user.userId,
         gender: gender ?? user.gender,
+        age: user.age,
         weight: weight ?? user.weight,
         height: height ?? user.height,
-        tr1: tr1 ?? user.tr1,
-        tr2: tr2 ?? user.tr2,
-        tr3: tr3 ?? user.tr3,
-        threshold: threshold ?? user.threshold,
-        reading: reading ?? user.reading,
-        mfi: mfi ?? user.mfi,
+        arv: arv ?? user.arv,
+        readings: reading ?? user.readings,
+        latestMfi: mfi ?? user.latestMfi,
+        mfiSeries: mfiSeries ?? user.mfiSeries,
       );
 
       await box.put(userId, updatedUser);

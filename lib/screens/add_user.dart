@@ -19,6 +19,7 @@ class _AddUserState extends State<AddUser> {
   late TextEditingController userIdController;
   late TextEditingController heightController;
   late TextEditingController weightController;
+  late TextEditingController ageController;
 
   List<String> genders = ["male", "female"];
 
@@ -30,6 +31,7 @@ class _AddUserState extends State<AddUser> {
     userIdController = TextEditingController();
     heightController = TextEditingController();
     weightController = TextEditingController();
+    ageController = TextEditingController();
     gender = genders[0];
   }
 
@@ -38,6 +40,7 @@ class _AddUserState extends State<AddUser> {
     userIdController.dispose();
     heightController.dispose();
     weightController.dispose();
+    ageController.dispose();
     super.dispose();
   }
 
@@ -79,6 +82,32 @@ class _AddUserState extends State<AddUser> {
                   validator: (value) {
                     if (value == null || value.isEmpty) {
                       return 'Please enter a user ID';
+                    }
+                    if (int.tryParse(value) == null) {
+                      return 'Please enter a valid number';
+                    }
+                    return null;
+                  },
+                ),
+
+                SizedBox(height: 20),
+
+                TextFormField(
+                  keyboardType: TextInputType.number,
+                  controller: ageController,
+                  decoration: InputDecoration(
+                    labelText: 'Age',
+                    labelStyle: TextStyle(color: AppColors().appGrey),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors().appGrey),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderSide: BorderSide(color: AppColors().appBlue),
+                    ),
+                  ),
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter an age';
                     }
                     if (int.tryParse(value) == null) {
                       return 'Please enter a valid number';
@@ -214,6 +243,7 @@ class _AddUserState extends State<AddUser> {
                           userProvider.addUser(
                             userId: int.parse(userIdController.text.trim()),
                             gender: gender,
+                            age: int.parse(ageController.text.trim()),
                             height: double.parse(heightController.text.trim()),
                             weight: double.parse(weightController.text.trim()),
                           );

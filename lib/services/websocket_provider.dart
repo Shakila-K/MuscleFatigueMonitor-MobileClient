@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:muscle_fatigue_monitor/main.dart';
+import 'package:muscle_fatigue_monitor/widgets/toast_alert.dart';
 import 'package:toastification/toastification.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 
@@ -15,8 +15,6 @@ class WebSocketProvider extends ChangeNotifier {
   int retryCount = 0;
   final int _maxRetries = 2;
   bool _manualDisconnect = false;
-
-  double threshold = 0;
 
   /// Connect to a WebSocket server
   Future<void> connect(String ipAddress) async {
@@ -35,7 +33,7 @@ class WebSocketProvider extends ChangeNotifier {
       isConnecting = false;
       retryCount = 0;
       debugPrint("WebSocket handshake successful");
-      _showToastSafe("Connected to $ipAddress (waiting for data...)", ToastificationType.success);
+      showToastSafe("Connected to $ipAddress (waiting for data...)", ToastificationType.success);
       notifyListeners();
 
       _channel!.stream.listen(
@@ -45,7 +43,7 @@ class WebSocketProvider extends ChangeNotifier {
             isConnecting = false;
             retryCount = 0;
             debugPrint("Connected after receiving first message");
-            _showToastSafe("Connected to $ipAddress ", ToastificationType.success);
+            showToastSafe("Connected to $ipAddress ", ToastificationType.success);
             notifyListeners();
           }
 
@@ -70,9 +68,9 @@ class WebSocketProvider extends ChangeNotifier {
           isConnecting = false;
           notifyListeners();
           if(_manualDisconnect){
-            _showToastSafe("Connection closed by user", ToastificationType.info);
+            showToastSafe("Connection closed by user", ToastificationType.info);
           }else{
-            _showToastSafe("Connection closed by server", ToastificationType.info);
+            showToastSafe("Connection closed by server", ToastificationType.info);
             _reconnect(ipAddress);
           }
           
@@ -82,10 +80,10 @@ class WebSocketProvider extends ChangeNotifier {
           isConnected = false;
           isConnecting = false;
           notifyListeners();
-          _showToastSafe("Stream error: $error", ToastificationType.error);
+          showToastSafe("Stream error: $error", ToastificationType.error);
 
           if (!_manualDisconnect) { //skip reconnect if manual
-            _showToastSafe("Stream error: $error", ToastificationType.error);
+            showToastSafe("Stream error: $error", ToastificationType.error);
             _reconnect(ipAddress);
           }
         },
@@ -93,19 +91,19 @@ class WebSocketProvider extends ChangeNotifier {
       );
     } on SocketException catch (e) {
       debugPrint("Socket error: $e");
-      _showToastSafe("Socket error: $e", ToastificationType.error);
+      showToastSafe("Socket error: $e", ToastificationType.error);
       isConnected = false;
       isConnecting = false;
       notifyListeners();
     } on WebSocketChannelException catch (e) {
       debugPrint("WebSocket error: $e");
-      _showToastSafe("WebSocket error: $e", ToastificationType.error);
+      showToastSafe("WebSocket error: $e", ToastificationType.error);
       isConnected = false;
       isConnecting = false;
       notifyListeners();
     } catch (e, st) {
       debugPrint("Unexpected error: $e\n$st");
-      _showToastSafe("Unexpected error: $e", ToastificationType.error);
+      showToastSafe("Unexpected error: $e", ToastificationType.error);
       isConnected = false;
       isConnecting = false;
       notifyListeners();
@@ -133,7 +131,7 @@ class WebSocketProvider extends ChangeNotifier {
   /// Reconnect with retry counter
   void _reconnect(String ipAddress) {
     if (retryCount >= _maxRetries) {
-      _showToastSafe("Max retry attempts reached. Stop reconnecting.", ToastificationType.error);
+      showToastSafe("Max retry attempts reached. Stop reconnecting.", ToastificationType.error);
       retryCount = 0;
       return;
     }
@@ -147,7 +145,7 @@ class WebSocketProvider extends ChangeNotifier {
           await connect(ipAddress);
         } catch (e, st) {
           debugPrint("Reconnect failed: $e\n$st");
-          _showToastSafe("Reconnect failed: $e", ToastificationType.error);
+          showToastSafe("Reconnect failed: $e", ToastificationType.error);
           isConnecting = false;
           notifyListeners();
         }
@@ -155,17 +153,4 @@ class WebSocketProvider extends ChangeNotifier {
     });
   }
 
-  /// Toast with global navigatorKey
-  void _showToastSafe(String message, ToastificationType type) {
-    final ctx = navigatorKey.currentContext;
-    if (ctx == null) return;
-    toastification.show(
-      context: ctx,
-      type: type,
-      style: ToastificationStyle.fillColored,
-      autoCloseDuration: const Duration(seconds: 3),
-      alignment: Alignment.bottomCenter,
-      title: Text(message),
-    );
-  }
 }

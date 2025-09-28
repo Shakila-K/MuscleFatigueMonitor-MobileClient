@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:muscle_fatigue_monitor/consts/colors.dart';
 import 'package:muscle_fatigue_monitor/consts/screen_size.dart';
 import 'package:muscle_fatigue_monitor/models/sensor_value.dart';
+import 'package:muscle_fatigue_monitor/services/user_provider.dart';
 import 'package:muscle_fatigue_monitor/services/websocket_provider.dart';
 import 'package:muscle_fatigue_monitor/widgets/button_long.dart';
 import 'package:muscle_fatigue_monitor/widgets/emg_graph.dart';
@@ -10,19 +11,19 @@ import 'package:muscle_fatigue_monitor/widgets/graph_data_info.dart';
 import 'package:provider/provider.dart';
 import 'package:toastification/toastification.dart';
 
-class RecordThreshold extends StatefulWidget {
-  const RecordThreshold({
+class RecordArv extends StatefulWidget {
+  const RecordArv({
     super.key,
   });
 
   @override
-  State<RecordThreshold> createState() => _RecordThresholdState();
+  State<RecordArv> createState() => _RecordArvState();
 }
 
-class _RecordThresholdState extends State<RecordThreshold> {
+class _RecordArvState extends State<RecordArv> {
 
   List<SensorValue> sensorValues = [];
-  List<double> thresholds = [];
+  List<double> arvs = [];
 
   late int recordCount;
 
@@ -41,23 +42,36 @@ class _RecordThresholdState extends State<RecordThreshold> {
     super.initState();
   }
 
-  void getMax(){
-    double max = 0;
-    for(SensorValue e in sensorValues){
-      debugPrint(e.value.toString());
-      if(e.value > max){
-        max = e.value;
-      }
+  void getArv() {
+    if (sensorValues.isEmpty) return;
+
+    // latest elapsed time
+    final latestTime = sensorValues.last.timestamp;
+
+    // filter values within the last 1 second
+    final lastSecondValues = sensorValues.where(
+      (e) => (latestTime - e.timestamp).inMilliseconds <= 1000,
+    );
+
+    if (lastSecondValues.isEmpty) return;
+
+    // max value in the last 1 second
+    double arv = 0;
+    for (SensorValue v in lastSecondValues) {
+      arv += v.value;
     }
-    thresholds.add(max);
+    arv = (arv / lastSecondValues.length);
+
+    arvs.add(arv);
+    debugPrint("New ARV added: $arv");
   }
 
-  double getThreshold(){
+  double getFinalArv(){
     double t = 0;
-    for (double i in thresholds){
+    for (double i in arvs){
       t+=i;
     }
-    return t/thresholds.length;
+    return t/arvs.length;
   }
 
   String getMemoryUsageMB(List<SensorValue> sensorValues) {
@@ -74,6 +88,7 @@ class _RecordThresholdState extends State<RecordThreshold> {
   Widget build(BuildContext context) {
 
     final ws = context.watch<WebSocketProvider>();
+    final userProvider = context.watch<UserProvider>();
 
     if((ws.isReading && recording && !doneRecording)){
       if(!stopwatch.isRunning){
@@ -82,7 +97,7 @@ class _RecordThresholdState extends State<RecordThreshold> {
         showSaveDiscard = false;
         sensorValues.clear();
       }
-      sensorValues.add(SensorValue(timestamp: stopwatch.elapsed, value: ws.latestValue.toDouble()));
+      sensorValues.add(SensorValue(timestamp: stopwatch.elapsed, value: ws.latestValue.toInt()));
     }
 
     if(!ws.isReading && recording){
@@ -94,7 +109,7 @@ class _RecordThresholdState extends State<RecordThreshold> {
     
     return Scaffold(
       appBar: AppBar(
-        title: Text("Record Threshold"),
+        title: Text("Record ARV"),
         backgroundColor: AppColors().backgroundBlack,
         automaticallyImplyLeading: true,
         foregroundColor: AppColors().appWhite,
@@ -115,7 +130,7 @@ class _RecordThresholdState extends State<RecordThreshold> {
                 children: [
                   
                   if(!recording)
-                    Text("Your EMG data will be recorded 3 times in order to get an average threshold value."),
+                    Text("Your EMG data will be recorded 3 times in order to get an average rectified value."),
 
                   (!recording) ?
                     Text("Put the device in IDLE mode (Red LED is off) then press the Start Recording button to begin.") :
@@ -139,10 +154,10 @@ class _RecordThresholdState extends State<RecordThreshold> {
                           ),
                           const SizedBox(width: 20,),
                           GraphDataInfo(
-                            icon: Icons.percent,
+                            icon: Icons.calculate,
                             iconColor: AppColors().appBlue,
-                            title: "Current \nThreshold",
-                            data: "${ thresholds.isEmpty ? "0" : (getThreshold()*100/4095).toStringAsFixed(2)}%",
+                            title: "Current \nARV",
+                            data: arvs.isEmpty ? "0" : (getFinalArv()).toStringAsFixed(2),
                           ),
                         ],
                       )
@@ -151,7 +166,7 @@ class _RecordThresholdState extends State<RecordThreshold> {
                 ],
               ),
 
-              Text("Threshold recorded $recordCount/3 time(s)"),
+              Text("ARV recorded $recordCount/3 time(s)"),
           
               Container(
                 padding: EdgeInsets.all(10),
@@ -235,9 +250,9 @@ class _RecordThresholdState extends State<RecordThreshold> {
                         onPressed: (){
                           showSaveDiscard = false;
                           recordCount ++;
-                          getMax();
+                          getArv();
                           if(recordCount>=3) doneRecording = true;
-                          debugPrint(thresholds.toString());
+                          debugPrint(arvs.toString());
                         }
                       ),
                     )
@@ -261,7 +276,7 @@ class _RecordThresholdState extends State<RecordThreshold> {
                           recordCount = 0;
                           recording = false;
                           doneRecording = false;
-                          thresholds.clear();
+                          arvs.clear();
                           stopwatch.reset();
                         }
                       ),
@@ -277,8 +292,9 @@ class _RecordThresholdState extends State<RecordThreshold> {
                         text: "Continue", 
                         backgroundColor: AppColors().appBlue,
                         onPressed: (){
-                          ws.threshold = getThreshold();
-
+                          userProvider.updateUserFields(userProvider.user!.userId, arv: getFinalArv());
+                          userProvider.getUser(userProvider.user!.userId);
+                          Navigator.of(context).pop();
                         }
                       ),
                     ),

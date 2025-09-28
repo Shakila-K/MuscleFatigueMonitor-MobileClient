@@ -1,8 +1,9 @@
 import 'package:hive/hive.dart';
+import 'sensor_value.dart'; // make sure SensorValue is Hive-compatible too
 
 part 'user_model.g.dart';
 
-@HiveType(typeId: 0) // unique id for adapter
+@HiveType(typeId: 0)
 class UserModel extends HiveObject {
   @HiveField(0)
   int userId;
@@ -11,40 +12,39 @@ class UserModel extends HiveObject {
   String gender;
 
   @HiveField(2)
-  double weight;
+  int age;
 
   @HiveField(3)
-  double height;
+  double weight;
 
   @HiveField(4)
-  int tr1;
+  double height;
 
+  /// Final baseline threshold (average MFI)
   @HiveField(5)
-  int tr2;
+  double arv;
 
+  /// Raw EMG signal (timestamp + value pairs)
   @HiveField(6)
-  int tr3;
+  List<SensorValue> readings;
 
+  /// Computed MFI values per window
   @HiveField(7)
-  double threshold;
+  List<double> mfiSeries;
 
+  /// Last computed MFI
   @HiveField(8)
-  List<int> reading;
-
-  @HiveField(9)
-  double mfi;
+  double latestMfi;
 
   UserModel({
     required this.userId,
     required this.gender,
+    required this.age,
     required this.weight,
     required this.height,
-    required this.tr1,
-    required this.tr2,
-    required this.tr3,
-    required this.threshold,
-    required this.reading,
-    required this.mfi,
+    required this.arv,
+    required this.readings,
+    required this.mfiSeries,
+    required this.latestMfi,
   });
 }
-

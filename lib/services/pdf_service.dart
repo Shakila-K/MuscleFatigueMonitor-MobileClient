@@ -46,7 +46,7 @@ class PdfService {
             sensorValues.length,
             (i) => pw.PointChartValue(
               i.toDouble(),
-              sensorValues[i].value,
+              (sensorValues[i].value * 1.0),
             ),
           ),
         ),

@@ -32,22 +32,25 @@ class UserScreen extends StatelessWidget {
               title: Text('Gender: ${user.gender}'),
             ),
             ListTile(
+              title: Text('Age: ${user.age} years'),
+            ),
+            ListTile(
               title: Text('Height: ${user.height} cm'),
             ),
             ListTile(
               title: Text('Weight: ${user.weight} kg'),
             ),
             ListTile(
-              title: Text('Threshold: ${user.threshold == 0 ? "N/A" : user.threshold}'),
+              title: Text('Average Rectified Value: ${user.arv == 0 ? "N/A" : user.arv}'),
             ),
             ListTile(
-              title: Text('Fatigue Index: ${user.mfi == 0 ? "N/A" : user.mfi}'),
+              title: Text('Fatigue Index: ${user.latestMfi == 0 ? "N/A" : user.latestMfi}'),
             ),
         
             const Spacer(),
         
             Visibility(
-              visible: user.reading.isNotEmpty,
+              visible: user.readings.isNotEmpty,
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
                 height: 70,

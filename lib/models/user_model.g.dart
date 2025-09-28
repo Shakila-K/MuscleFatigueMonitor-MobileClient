@@ -19,41 +19,38 @@ class UserModelAdapter extends TypeAdapter<UserModel> {
     return UserModel(
       userId: fields[0] as int,
       gender: fields[1] as String,
-      weight: fields[2] as double,
-      height: fields[3] as double,
-      tr1: fields[4] as int,
-      tr2: fields[5] as int,
-      tr3: fields[6] as int,
-      threshold: fields[7] as double,
-      reading: (fields[8] as List).cast<int>(),
-      mfi: fields[9] as double,
+      age: fields[2] as int,
+      weight: fields[3] as double,
+      height: fields[4] as double,
+      arv: fields[5] as double,
+      readings: (fields[6] as List).cast<SensorValue>(),
+      mfiSeries: (fields[7] as List).cast<double>(),
+      latestMfi: fields[8] as double,
     );
   }
 
   @override
   void write(BinaryWriter writer, UserModel obj) {
     writer
-      ..writeByte(10)
+      ..writeByte(9)
       ..writeByte(0)
       ..write(obj.userId)
       ..writeByte(1)
       ..write(obj.gender)
       ..writeByte(2)
-      ..write(obj.weight)
+      ..write(obj.age)
       ..writeByte(3)
-      ..write(obj.height)
+      ..write(obj.weight)
       ..writeByte(4)
-      ..write(obj.tr1)
+      ..write(obj.height)
       ..writeByte(5)
-      ..write(obj.tr2)
+      ..write(obj.arv)
       ..writeByte(6)
-      ..write(obj.tr3)
+      ..write(obj.readings)
       ..writeByte(7)
-      ..write(obj.threshold)
+      ..write(obj.mfiSeries)
       ..writeByte(8)
-      ..write(obj.reading)
-      ..writeByte(9)
-      ..write(obj.mfi);
+      ..write(obj.latestMfi);
   }
 
   @override
