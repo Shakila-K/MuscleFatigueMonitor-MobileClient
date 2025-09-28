@@ -6,30 +6,40 @@ import 'package:muscle_fatigue_monitor/models/sensor_value.dart';
 class EmgGraph extends StatelessWidget {
   final List<SensorValue> sensorValues;
   final Duration timeStamp;
-  const EmgGraph({super.key, required this.sensorValues, required this.timeStamp});
+  final bool? lastvalues;
+  final double? maximumY;
+  const EmgGraph({super.key, required this.sensorValues, required this.timeStamp, this.lastvalues, this.maximumY});
 
   @override
   Widget build(BuildContext context) {
 
     double minY = 0;
-    double maxY = 4095;
+    double maxY = maximumY ?? 4095;
 
     List<FlSpot> getLastSpots(int count, List<SensorValue> sensorValues) {
       if (sensorValues.isEmpty) return [];
       int start = sensorValues.length > count ? sensorValues.length - count : 0;
       return sensorValues.sublist(start).map((e) {
         double x = (e.timestamp.inMilliseconds /1000);
-        return FlSpot(x, (e.value*1.0));
+        return FlSpot(x, (e.value));
+      }).toList();
+    }
+
+    List<FlSpot> getAllSpots(List<SensorValue> sensorValues) {
+      if (sensorValues.isEmpty) return [];
+      return sensorValues.map((e) {
+        double x = (e.timestamp.inMilliseconds /1000);
+        return FlSpot(x, (e.value));
       }).toList();
     }
 
     double getMinX(int count, List<SensorValue> sensorValues) {
-      final spots = getLastSpots(count, sensorValues);
+      final spots = (lastvalues != null && lastvalues == false)? getAllSpots(sensorValues) : getLastSpots(count, sensorValues);
       return spots.isNotEmpty ? spots.first.x : 0;
     }
 
     double getMaxX(List<SensorValue> sensorValues) {
-      final spots = getLastSpots(100, sensorValues);
+      final spots = (lastvalues != null && lastvalues == false)? getAllSpots(sensorValues) : getLastSpots(100, sensorValues);
       return spots.isNotEmpty ? spots.last.x : 100;
     }
 
@@ -37,7 +47,7 @@ class EmgGraph extends StatelessWidget {
       children: [
         SizedBox(
               height: 350,
-              width: 400,
+              width: (lastvalues != null && lastvalues == false)? MediaQuery.of(context).size.width : 400,
               child: LineChart(
                 LineChartData(
                   gridData: FlGridData(
@@ -85,7 +95,7 @@ class EmgGraph extends StatelessWidget {
                   borderData: FlBorderData(show: false),
                   lineBarsData: [
                     LineChartBarData(
-                      spots: getLastSpots(100, sensorValues),
+                      spots: (lastvalues != null && lastvalues == false)? getAllSpots(sensorValues) : getLastSpots(100, sensorValues),
                       isCurved: false,
                       barWidth: 3,
                       belowBarData: BarAreaData(show: false),

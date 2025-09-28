@@ -41,8 +41,9 @@ class UserProvider extends ChangeNotifier {
       height: height,
       arv: 0.0,
       readings: [],
-      mfiSeries: [],
+      mfSeries: [],
       latestMfi: 0.0,
+      threshold: 0.0,
     );
 
     await box.put(userId, user);
@@ -69,15 +70,14 @@ class UserProvider extends ChangeNotifier {
   /// Update only specific fields of a user
   Future<void> updateUserFields(int userId, {
     String? gender,
+    int? age,
     double? weight,
     double? height,
-    double? tr1,
-    double? tr2,
-    double? tr3,
     double? arv,
     List<SensorValue>? reading,
-    double? mfi,
-    List<double>? mfiSeries,
+    double? latestMfi,
+    List<SensorValue>? mfSeries,
+    double? threshold,
   }) async {
     final box = Hive.box<UserModel>(_boxName);
     final user = box.get(userId);
@@ -91,8 +91,9 @@ class UserProvider extends ChangeNotifier {
         height: height ?? user.height,
         arv: arv ?? user.arv,
         readings: reading ?? user.readings,
-        latestMfi: mfi ?? user.latestMfi,
-        mfiSeries: mfiSeries ?? user.mfiSeries,
+        latestMfi: latestMfi ?? user.latestMfi,
+        mfSeries: mfSeries ?? user.mfSeries,
+        threshold: threshold ?? user.threshold,
       );
 
       await box.put(userId, updatedUser);

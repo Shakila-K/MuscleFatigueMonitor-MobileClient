@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:muscle_fatigue_monitor/consts/colors.dart';
 
 class ButtonLong extends StatelessWidget {
-  final Widget prefix;
+  final Widget? prefix;
   final String text;
   final void Function() onPressed;
   final Color? backgroundColor;
@@ -10,7 +10,7 @@ class ButtonLong extends StatelessWidget {
 
   const ButtonLong({
     super.key,
-    required this.prefix,
+    this.prefix,
     required this.text,
     required this.onPressed,
     this.backgroundColor,
@@ -34,7 +34,9 @@ class ButtonLong extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            prefix,
+            if(prefix != null) ...[
+              prefix!,
+            ],
             Text(text, 
               style: TextStyle(fontSize: 16),
             ),

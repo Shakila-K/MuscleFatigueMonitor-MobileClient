@@ -24,15 +24,16 @@ class UserModelAdapter extends TypeAdapter<UserModel> {
       height: fields[4] as double,
       arv: fields[5] as double,
       readings: (fields[6] as List).cast<SensorValue>(),
-      mfiSeries: (fields[7] as List).cast<double>(),
+      mfSeries: (fields[7] as List).cast<SensorValue>(),
       latestMfi: fields[8] as double,
+      threshold: fields[9] as double,
     );
   }
 
   @override
   void write(BinaryWriter writer, UserModel obj) {
     writer
-      ..writeByte(9)
+      ..writeByte(10)
       ..writeByte(0)
       ..write(obj.userId)
       ..writeByte(1)
@@ -48,9 +49,11 @@ class UserModelAdapter extends TypeAdapter<UserModel> {
       ..writeByte(6)
       ..write(obj.readings)
       ..writeByte(7)
-      ..write(obj.mfiSeries)
+      ..write(obj.mfSeries)
       ..writeByte(8)
-      ..write(obj.latestMfi);
+      ..write(obj.latestMfi)
+      ..writeByte(9)
+      ..write(obj.threshold);
   }
 
   @override

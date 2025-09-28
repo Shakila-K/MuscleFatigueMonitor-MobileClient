@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:muscle_fatigue_monitor/consts/colors.dart';
 import 'package:muscle_fatigue_monitor/consts/screen_size.dart';
 import 'package:muscle_fatigue_monitor/screens/record_arv.dart';
+import 'package:muscle_fatigue_monitor/screens/record_muscle_fatigue.dart';
 import 'package:muscle_fatigue_monitor/screens/users_screen.dart';
 import 'package:muscle_fatigue_monitor/services/user_provider.dart';
 import 'package:muscle_fatigue_monitor/services/websocket_provider.dart';
@@ -305,7 +306,7 @@ class _HomePageState extends State<HomePage> {
                     );
                   } else{
                     Navigator.of(context).push(
-                      MaterialPageRoute(builder: (context) => RecordArv())
+                      MaterialPageRoute(builder: (context) => RecordMuscleFatigue())
                     );
                   }
                 },

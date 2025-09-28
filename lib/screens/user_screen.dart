@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:muscle_fatigue_monitor/consts/colors.dart';
 import 'package:muscle_fatigue_monitor/models/user_model.dart';
+import 'package:muscle_fatigue_monitor/services/pdf_service.dart';
 import 'package:muscle_fatigue_monitor/services/user_provider.dart';
 import 'package:muscle_fatigue_monitor/widgets/button_long.dart';
+import 'package:muscle_fatigue_monitor/widgets/emg_graph.dart';
 import 'package:provider/provider.dart';
 
 
@@ -15,15 +17,17 @@ class UserScreen extends StatelessWidget {
 
     final userProvider = context.watch<UserProvider>();
 
+    double maxMFY = user.mfSeries.isNotEmpty ? user.mfSeries.map((e) => e.value).reduce((a, b) => a > b ? a : b)*1.25 : 0.001;
+
     return Scaffold(
       backgroundColor: AppColors().backgroundBlack,
       appBar: AppBar(
         title: Text("User Info"),
         backgroundColor: AppColors().backgroundBlack,
       ),
-      body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+      body: SingleChildScrollView(
+        child: Wrap(
+          // crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ListTile(
               title: Text('User ID: ${user.userId}'),
@@ -44,7 +48,31 @@ class UserScreen extends StatelessWidget {
               title: Text('Average Rectified Value: ${user.arv == 0 ? "N/A" : user.arv}'),
             ),
             ListTile(
-              title: Text('Fatigue Index: ${user.latestMfi == 0 ? "N/A" : user.latestMfi}'),
+              title: Text('Last Muscle Fatigue Index: ${user.latestMfi == 0 ? "N/A" : user.latestMfi}'),
+            ),
+
+            ListTile(
+              title: Text('EMG Signal'),
+            ),
+
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: SizedBox(
+                width: (user.readings.last.timestamp.inSeconds - user.readings.first.timestamp.inSeconds) * 50 + 50,
+                child: EmgGraph(sensorValues: user.readings, timeStamp: user.readings.last.timestamp, lastvalues: false,)
+              )
+            ),
+
+            ListTile(
+              title: Text('Muscle Fatigue Variation'),
+            ),
+
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: SizedBox(
+                width: (user.mfSeries.last.timestamp.inSeconds - user.mfSeries.first.timestamp.inSeconds) * 50 + 50,
+                child: EmgGraph(sensorValues: user.mfSeries, timeStamp: user.mfSeries.last.timestamp, lastvalues: false, maximumY: maxMFY,)
+              )
             ),
         
             const Spacer(),
@@ -61,7 +89,22 @@ class UserScreen extends StatelessWidget {
                     child: Icon(Icons.print),
                   ), 
                   text: "Print Data", 
-                  onPressed: (){}
+                  onPressed: () async{
+                    final pdfData = await PdfService().generateUserReport(
+                      userId: user.userId.toString(),
+                      gender: user.gender,
+                      age: user.age,
+                      height: user.height,
+                      weight: user.weight,
+                      arv: user.arv,
+                      latestMfi: user.latestMfi,
+                      emgValues: user.readings,
+                      mfValues: user.mfSeries,
+                    );
+
+                    await PdfService().sharePdf(pdfData, 'user_${user.userId}_report');
+
+                  }
                 ),
               ),
             ),
@@ -103,7 +146,11 @@ class UserScreen extends StatelessWidget {
                   ),
                 ],
               ),
-            )
+            ),
+            Container(
+              height: 150,
+              child: Text(''),
+            ),
           ],
         ),
       ),

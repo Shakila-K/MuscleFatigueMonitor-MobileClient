@@ -58,7 +58,7 @@ class _RecordArvState extends State<RecordArv> {
     // max value in the last 1 second
     double arv = 0;
     for (SensorValue v in lastSecondValues) {
-      arv += v.value;
+      arv += v.value.abs();
     }
     arv = (arv / lastSecondValues.length);
 
@@ -97,7 +97,7 @@ class _RecordArvState extends State<RecordArv> {
         showSaveDiscard = false;
         sensorValues.clear();
       }
-      sensorValues.add(SensorValue(timestamp: stopwatch.elapsed, value: ws.latestValue.toInt()));
+      sensorValues.add(SensorValue(timestamp: stopwatch.elapsed, value: ws.latestValue.toDouble()));
     }
 
     if(!ws.isReading && recording){

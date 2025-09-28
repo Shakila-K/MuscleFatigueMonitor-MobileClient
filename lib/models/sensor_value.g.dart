@@ -18,7 +18,7 @@ class SensorValueAdapter extends TypeAdapter<SensorValue> {
     };
     return SensorValue(
       timestamp: fields[0] as Duration,
-      value: fields[1] as int,
+      value: fields[1] as double,
     );
   }
 

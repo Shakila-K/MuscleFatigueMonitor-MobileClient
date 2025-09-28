@@ -20,6 +20,7 @@ void main() async{
       WidgetsFlutterBinding.ensureInitialized();
       await Hive.initFlutter();
       Hive.registerAdapter(UserModelAdapter());
+      Hive.registerAdapter(SensorValueAdapter()); 
       Hive.registerAdapter(DurationAdapter());
 
       await Hive.deleteFromDisk();

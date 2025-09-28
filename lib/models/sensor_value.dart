@@ -8,7 +8,7 @@ class SensorValue {
   final Duration timestamp;
 
   @HiveField(1)
-  final int value;
+  final double value;
 
   SensorValue({
     required this.timestamp,

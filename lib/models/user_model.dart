@@ -30,11 +30,14 @@ class UserModel extends HiveObject {
 
   /// Computed MFI values per window
   @HiveField(7)
-  List<double> mfiSeries;
+  List<SensorValue> mfSeries;
 
   /// Last computed MFI
   @HiveField(8)
   double latestMfi;
+
+  @HiveField(9)
+  double threshold;
 
   UserModel({
     required this.userId,
@@ -44,7 +47,8 @@ class UserModel extends HiveObject {
     required this.height,
     required this.arv,
     required this.readings,
-    required this.mfiSeries,
+    required this.mfSeries,
     required this.latestMfi,
+    required this.threshold,
   });
 }

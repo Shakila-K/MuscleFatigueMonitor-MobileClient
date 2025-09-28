@@ -204,9 +204,9 @@ class _HomePage2State extends State<HomePage2> {
               padding: const EdgeInsets.all(10.0),
               child: ElevatedButton(
                 onPressed: () async {
-                  final pdfData = await PdfService().generateSensorGraphReport(sensorValues);
+                  // final pdfData = await PdfService().generateSensorGraphReport(sensorValues);
 
-                  await PdfService().sharePdf(pdfData, 'EMG Data.pdf');
+                  // await PdfService().sharePdf(pdfData, 'EMG Data.pdf');
                   // await Printing.layoutPdf(
                   //   onLayout: (_) async => pdfData,
                   // );
