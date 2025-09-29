@@ -140,7 +140,7 @@ class _RecordArvState extends State<RecordArv> {
                   
                   Column(
                     children: [
-                      EmgGraph(sensorValues: sensorValues, timeStamp: stopwatch.elapsed,),
+                      EmgGraph(sensorValues: sensorValues, timeStamp: stopwatch.elapsed, ),
                       Padding(
                         padding: const EdgeInsets.symmetric(vertical: 20.0),
                       ),

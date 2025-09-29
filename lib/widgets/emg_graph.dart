@@ -47,7 +47,7 @@ class EmgGraph extends StatelessWidget {
       children: [
         SizedBox(
               height: 350,
-              width: (lastvalues != null && lastvalues == false)? MediaQuery.of(context).size.width : 400,
+              // width: (lastvalues != null && lastvalues == false)? MediaQuery.of(context).size.width : 400,
               child: LineChart(
                 LineChartData(
                   gridData: FlGridData(

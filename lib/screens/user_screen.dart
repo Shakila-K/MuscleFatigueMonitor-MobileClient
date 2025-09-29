@@ -52,9 +52,10 @@ class UserScreen extends StatelessWidget {
             ),
 
             ListTile(
-              title: Text('EMG Signal'),
+              title: Text('EMG Signal ${(user.readings.isEmpty)? ": N/A" : "" }'),
             ),
 
+            if(user.readings.isNotEmpty)
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: SizedBox(
@@ -64,9 +65,11 @@ class UserScreen extends StatelessWidget {
             ),
 
             ListTile(
-              title: Text('Muscle Fatigue Variation'),
+              title: Text('Muscle Fatigue Variation ${(user.mfSeries.isEmpty)? ": N/A" : "" }'),
             ),
 
+
+            if(user.mfSeries.isNotEmpty)
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: SizedBox(
