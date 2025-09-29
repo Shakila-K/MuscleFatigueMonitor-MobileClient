@@ -23,7 +23,7 @@ void main() async{
       Hive.registerAdapter(SensorValueAdapter()); 
       Hive.registerAdapter(DurationAdapter());
 
-      await Hive.deleteFromDisk();
+      // await Hive.deleteFromDisk();
 
       await Hive.openBox<UserModel>('users');
 
