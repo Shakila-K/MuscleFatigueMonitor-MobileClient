@@ -11,7 +11,7 @@ class UserProvider extends ChangeNotifier {
   UserModel? get user => _currentUser;
 
   /// Check if a user exists with given [userId]
-  bool userExists(int userId) {
+  bool userExists(String userId) {
     final box = Hive.box<UserModel>(_boxName);
     return box.containsKey(userId);
   }
@@ -24,7 +24,7 @@ class UserProvider extends ChangeNotifier {
 
   /// Save a new user (with default values for training/threshold/reading)
   Future<void> addUser({
-    required int userId,
+    required String userId,
     required String gender,
     required double weight,
     required double height,
@@ -39,11 +39,9 @@ class UserProvider extends ChangeNotifier {
       age: age,
       weight: weight,
       height: height,
-      arv: 0.0,
+      threshold: 0.0,
       readings: [],
       mfSeries: [],
-      latestMfi: 0.0,
-      threshold: 0.0,
     );
 
     await box.put(userId, user);
@@ -52,7 +50,7 @@ class UserProvider extends ChangeNotifier {
   }
 
   /// Get a specific user by [userId]
-  UserModel? getUser(int userId) {
+  UserModel? getUser(String userId) {
     final box = Hive.box<UserModel>(_boxName);
     _currentUser = box.get(userId);
     notifyListeners();
@@ -68,14 +66,12 @@ class UserProvider extends ChangeNotifier {
   }
 
   /// Update only specific fields of a user
-  Future<void> updateUserFields(int userId, {
+  Future<void> updateUserFields(String userId, {
     String? gender,
     int? age,
     double? weight,
     double? height,
-    double? arv,
     List<SensorValue>? reading,
-    double? latestMfi,
     List<SensorValue>? mfSeries,
     double? threshold,
   }) async {
@@ -89,9 +85,7 @@ class UserProvider extends ChangeNotifier {
         age: user.age,
         weight: weight ?? user.weight,
         height: height ?? user.height,
-        arv: arv ?? user.arv,
         readings: reading ?? user.readings,
-        latestMfi: latestMfi ?? user.latestMfi,
         mfSeries: mfSeries ?? user.mfSeries,
         threshold: threshold ?? user.threshold,
       );
@@ -114,7 +108,7 @@ class UserProvider extends ChangeNotifier {
   }
 
   /// Delete a user by userId
-  Future<void> deleteUser(int userId) async {
+  Future<void> deleteUser(String userId) async {
     final box = Hive.box<UserModel>(_boxName);
     await box.delete(userId);
 

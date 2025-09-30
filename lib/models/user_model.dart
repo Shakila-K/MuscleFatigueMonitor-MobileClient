@@ -6,7 +6,7 @@ part 'user_model.g.dart';
 @HiveType(typeId: 0)
 class UserModel extends HiveObject {
   @HiveField(0)
-  int userId;
+  String userId;
 
   @HiveField(1)
   String gender;
@@ -22,7 +22,7 @@ class UserModel extends HiveObject {
 
   /// Final baseline threshold (average MFI)
   @HiveField(5)
-  double arv;
+  double threshold;
 
   /// Raw EMG signal (timestamp + value pairs)
   @HiveField(6)
@@ -32,12 +32,6 @@ class UserModel extends HiveObject {
   @HiveField(7)
   List<SensorValue> mfSeries;
 
-  /// Last computed MFI
-  @HiveField(8)
-  double latestMfi;
-
-  @HiveField(9)
-  double threshold;
 
   UserModel({
     required this.userId,
@@ -45,10 +39,8 @@ class UserModel extends HiveObject {
     required this.age,
     required this.weight,
     required this.height,
-    required this.arv,
     required this.readings,
     required this.mfSeries,
-    required this.latestMfi,
     required this.threshold,
   });
 }

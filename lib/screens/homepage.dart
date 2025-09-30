@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:muscle_fatigue_monitor/consts/colors.dart';
 import 'package:muscle_fatigue_monitor/consts/screen_size.dart';
-import 'package:muscle_fatigue_monitor/screens/record_arv.dart';
+import 'package:muscle_fatigue_monitor/screens/record_threshold.dart';
 import 'package:muscle_fatigue_monitor/screens/record_muscle_fatigue.dart';
 import 'package:muscle_fatigue_monitor/screens/users_screen.dart';
 import 'package:muscle_fatigue_monitor/services/user_provider.dart';
@@ -244,7 +244,7 @@ class _HomePageState extends State<HomePage> {
                   height: 25,
                   child: Image.asset("assets/icons/button.png", color: AppColors().appWhite,)
                 ),
-                text: "Record ARV",
+                text: "Record Fatigue Index",
                 onPressed: () {
                   if(!ws.isConnected){
                     toastification.dismissAll();
@@ -272,14 +272,14 @@ class _HomePageState extends State<HomePage> {
                     );
                   }else{
                     Navigator.of(context).push(
-                      MaterialPageRoute(builder: (context) => RecordArv())
+                      MaterialPageRoute(builder: (context) => RecordThreshold())
                     );
                   }
                 },
               ),
             ),
 
-            if(userProvider.user != null && userProvider.user!.arv != 0)
+            if(userProvider.user != null && userProvider.user!.threshold != 0)
             Padding(
               padding: const EdgeInsets.only(bottom: 40.0),
               child: ButtonLong(
@@ -287,7 +287,8 @@ class _HomePageState extends State<HomePage> {
                   margin: EdgeInsets.only(right: 10),
                   width: 25,
                   height: 25,
-                  child: Image.asset("assets/icons/button.png", color: AppColors().appWhite,)
+                  // child: Image.asset("assets/icons/button.png", color: AppColors().appWhite,)
+                  child: Icon(Icons.fitness_center, color: AppColors().appWhite, size: 22,),
                 ),
                 backgroundColor: AppColors().appGreen,
                 text: "Record Muscle Fatigue",

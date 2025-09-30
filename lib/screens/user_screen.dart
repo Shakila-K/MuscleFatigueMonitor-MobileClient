@@ -30,7 +30,7 @@ class UserScreen extends StatelessWidget {
           // crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ListTile(
-              title: Text('User ID: ${user.userId}'),
+              title: Text('Username: ${user.userId}'),
             ),
             ListTile(
               title: Text('Gender: ${user.gender}'),
@@ -45,10 +45,7 @@ class UserScreen extends StatelessWidget {
               title: Text('Weight: ${user.weight} kg'),
             ),
             ListTile(
-              title: Text('Average Rectified Value: ${user.arv == 0 ? "N/A" : user.arv}'),
-            ),
-            ListTile(
-              title: Text('Last Muscle Fatigue Index: ${user.latestMfi == 0 ? "N/A" : user.latestMfi}'),
+              title: Text('Muscle Fatigue Index: ${user.threshold == 0 ? "N/A" : user.threshold}'),
             ),
 
             ListTile(
@@ -78,12 +75,12 @@ class UserScreen extends StatelessWidget {
               )
             ),
         
-            const Spacer(),
         
             Visibility(
               visible: user.readings.isNotEmpty,
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
+                margin: EdgeInsets.only(top: 50),
                 height: 70,
                 child: ButtonLong(
                   backgroundColor: AppColors().appGreen,
@@ -99,13 +96,12 @@ class UserScreen extends StatelessWidget {
                       age: user.age,
                       height: user.height,
                       weight: user.weight,
-                      arv: user.arv,
-                      latestMfi: user.latestMfi,
                       emgValues: user.readings,
                       mfValues: user.mfSeries,
+                      threshold: user.threshold,
                     );
 
-                    await PdfService().sharePdf(pdfData, 'user_${user.userId}_report');
+                    await PdfService().sharePdf(pdfData, '${user.userId}_report');
 
                   }
                 ),
@@ -114,6 +110,7 @@ class UserScreen extends StatelessWidget {
         
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10),
+              margin: EdgeInsets.only(top: 20),
               height: 70,
               child: Row(
                 children: [

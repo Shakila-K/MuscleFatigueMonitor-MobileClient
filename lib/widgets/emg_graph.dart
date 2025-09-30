@@ -8,7 +8,8 @@ class EmgGraph extends StatelessWidget {
   final Duration timeStamp;
   final bool? lastvalues;
   final double? maximumY;
-  const EmgGraph({super.key, required this.sensorValues, required this.timeStamp, this.lastvalues, this.maximumY});
+  final double? height;
+  const EmgGraph({super.key, required this.sensorValues, required this.timeStamp, this.lastvalues, this.maximumY, this.height});
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +47,7 @@ class EmgGraph extends StatelessWidget {
     return Column(
       children: [
         SizedBox(
-              height: 350,
+              height: height ?? 350,
               // width: (lastvalues != null && lastvalues == false)? MediaQuery.of(context).size.width : 400,
               child: LineChart(
                 LineChartData(

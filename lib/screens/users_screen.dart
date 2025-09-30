@@ -37,7 +37,7 @@ class UsersScreen extends StatelessWidget {
               itemBuilder: (BuildContext context, int index) {
                 return ListTile(
                   title: Text(
-                    'User ID: ${users[index].userId}',
+                    'Username: ${users[index].userId}',
                     style: const TextStyle(color: Colors.white),
                   ),
                   subtitle: Column(
@@ -53,13 +53,8 @@ class UsersScreen extends StatelessWidget {
                           
                         ],
                       ),
-                      Row(
-                        children: [
-                          Text("ARV : ${users[index].arv == 0 ? "N/A" : users[index].arv.toStringAsFixed(2)}", style: TextStyle(color: AppColors().appGrey),),
-                          SizedBox(width: 20,),
-                          Text("MFI : ${users[index].latestMfi == 0 ? "N/A" : users[index].latestMfi}", style: TextStyle(color: AppColors().appGrey),),
-                        ],
-                      )
+                      Text("Threshold : ${users[index].threshold == 0 ? "N/A" : users[index].threshold.toStringAsFixed(8)}", style: TextStyle(color: AppColors().appGrey),),
+                      SizedBox(width: 20,)
                     ],
                   ),
                   minVerticalPadding: 15,

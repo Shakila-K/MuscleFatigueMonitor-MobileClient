@@ -67,10 +67,9 @@ class _AddUserState extends State<AddUser> {
               children: [
 
                 TextFormField(
-                  keyboardType: TextInputType.number,
                   controller: userIdController,
                   decoration: InputDecoration(
-                    labelText: 'User ID',
+                    labelText: 'Username',
                     labelStyle: TextStyle(color: AppColors().appGrey),
                     enabledBorder: OutlineInputBorder(
                       borderSide: BorderSide(color: AppColors().appGrey),
@@ -81,10 +80,7 @@ class _AddUserState extends State<AddUser> {
                   ),
                   validator: (value) {
                     if (value == null || value.isEmpty) {
-                      return 'Please enter a user ID';
-                    }
-                    if (int.tryParse(value) == null) {
-                      return 'Please enter a valid number';
+                      return 'Please enter a username';
                     }
                     return null;
                   },
@@ -227,7 +223,7 @@ class _AddUserState extends State<AddUser> {
                     text: "Save User",
                     onPressed: () {
                       if (_formKey.currentState!.validate()) {
-                        if(userProvider.userExists(int.parse(userIdController.text.trim()))){
+                        if(userProvider.userExists(userIdController.text)){
                           toastification.show(
                             context: context, // optional if you use ToastificationWrapper
                             title: Text('User ID already exist!'),
@@ -241,7 +237,7 @@ class _AddUserState extends State<AddUser> {
                           return;
                         } else {
                           userProvider.addUser(
-                            userId: int.parse(userIdController.text.trim()),
+                            userId: userIdController.text,
                             gender: gender,
                             age: int.parse(ageController.text.trim()),
                             height: double.parse(heightController.text.trim()),

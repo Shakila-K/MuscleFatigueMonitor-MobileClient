@@ -16,8 +16,7 @@ class PdfService {
     required int age,
     required double height,
     required double weight,
-    required double arv,
-    required double latestMfi,
+    required double threshold,
     required List<SensorValue> emgValues,
     required List<SensorValue> mfValues,
   }) async {
@@ -98,8 +97,8 @@ class PdfService {
 
     // Safely generate the Y-axis values for the MFI chart
     List<double> mfiYAxisValues;
-    if (latestMfi > 0.0) {
-      mfiYAxisValues = [0, 0.25 * latestMfi, 0.5 * latestMfi, 0.75 * latestMfi, latestMfi];
+    if (mfValues.last.value > 0.0) {
+      mfiYAxisValues = [0, 0.25 * mfValues.last.value, 0.5 * mfValues.last.value, 0.75 * mfValues.last.value, mfValues.last.value];
     } else {
       // Use a default, small ascending scale if latestMfi is 0 or negative
       mfiYAxisValues = [0.0, 0.001, 0.002, 0.003, 0.004];
@@ -138,8 +137,7 @@ class PdfService {
               pw.Text('Age: $age years', style: pw.TextStyle(fontSize: 12)),
               pw.Text('Height: $height cm', style: pw.TextStyle(fontSize: 12)),
               pw.Text('Weight: $weight kg', style: pw.TextStyle(fontSize: 12)),
-              pw.Text('Average Rectified Value: ${arv.toStringAsFixed(2)}', style: pw.TextStyle(fontSize: 12)),
-              pw.Text('Last Muscle Fatigue Index: ${latestMfi.toStringAsFixed(2)}', style: pw.TextStyle(fontSize: 12)),
+              pw.Text('Muscle Fatigue Threshold: ${threshold.toStringAsFixed(2)}', style: pw.TextStyle(fontSize: 12)),
               pw.SizedBox(height: 20),
 
               // EMG graph
