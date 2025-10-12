@@ -8,6 +8,9 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:share_plus/share_plus.dart';
 
+import 'package:flutter/foundation.dart' show defaultTargetPlatform, TargetPlatform;
+import 'package:open_file/open_file.dart';
+
 class PdfService {
   /// Generate PDF report with sensor graph
   Future<Uint8List> generateUserReport({
@@ -32,33 +35,54 @@ class PdfService {
 
       final sorted = [...values]..sort((a, b) => a.timestamp.compareTo(b.timestamp));
 
-      return List<pw.PointChartValue>.generate(
-        sorted.length,
-        (i) => pw.PointChartValue(i.toDouble(), sorted[i].value), // Use index as the X value
-      );
+      // return List<pw.PointChartValue>.generate(
+      //   sorted.length,
+      //   (i) => pw.PointChartValue(i.toDouble(), sorted[i].value), // Use index as the X value
+      // );
+       return sorted
+        .map((v) => pw.PointChartValue(v.timestamp.inMilliseconds / 1000.0, v.value))
+        .toList();
     }
     
     // Helper: generate x-axis values for 1-second intervals
+    // List<double> generateSecondIntervals(List<SensorValue> values) {
+    //   if (values.isEmpty) return [];
+    //   final sorted = [...values]..sort((a, b) => a.timestamp.compareTo(b.timestamp));
+    //   final List<double> intervalIndices = [];
+    //   int lastSecond = -1;
+
+    //   for (int i = 0; i < sorted.length; i++) {
+    //     final currentSecond = sorted[i].timestamp.inSeconds;
+    //     if (currentSecond > lastSecond) {
+    //       intervalIndices.add(i.toDouble());
+    //       lastSecond = currentSecond;
+    //     }
+    //   }
+    //   return intervalIndices;
+    // }
     List<double> generateSecondIntervals(List<SensorValue> values) {
       if (values.isEmpty) return [];
+
       final sorted = [...values]..sort((a, b) => a.timestamp.compareTo(b.timestamp));
-      final List<double> intervalIndices = [];
+      final List<double> secondMarks = [];
       int lastSecond = -1;
 
-      for (int i = 0; i < sorted.length; i++) {
-        final currentSecond = sorted[i].timestamp.inSeconds;
-        if (currentSecond > lastSecond) {
-          intervalIndices.add(i.toDouble());
-          lastSecond = currentSecond;
+      for (var value in sorted) {
+        final sec = value.timestamp.inMilliseconds ~/ 1000;
+        if (sec > lastSecond) {
+          secondMarks.add(value.timestamp.inMilliseconds / 1000.0);
+          lastSecond = sec;
         }
       }
-      return intervalIndices;
+      return secondMarks;
     }
+
+
 
 
     // Determine page width based on the largest dataset
     final maxPoints = emgValues.length > mfValues.length ? emgValues.length : mfValues.length;
-    final double pageWidth = maxPoints * pointWidth + 50;
+    final double pageWidth = maxPoints * pointWidth + 250;
 
     // Theme
     final theme = pw.ThemeData.withFont(
@@ -74,7 +98,7 @@ class PdfService {
 
     final emgChart = pw.Chart(
       grid: pw.CartesianGrid(
-        xAxis: pw.FixedAxis(emgXAxisValues, divisions: true),
+        xAxis: pw.FixedAxis(emgXAxisValues.map((v) => double.parse(v.toStringAsFixed(2))).toList(), divisions: true),
         yAxis: pw.FixedAxis([0, 1024, 2048, 3072, 4096], divisions: true),
       ),
       datasets: [
@@ -95,26 +119,66 @@ class PdfService {
     final firstMfiTime = mfValues.isNotEmpty ? mfValues.first.timestamp.inSeconds : 0;
     final lastMfiTime = mfValues.isNotEmpty ? mfValues.last.timestamp.inSeconds : 0;
 
-    // Safely generate the Y-axis values for the MFI chart
-    List<double> mfiYAxisValues;
-    if (mfValues.last.value > 0.0) {
-      mfiYAxisValues = [0, 0.25 * mfValues.last.value, 0.5 * mfValues.last.value, 0.75 * mfValues.last.value, mfValues.last.value];
-    } else {
-      // Use a default, small ascending scale if latestMfi is 0 or negative
-      mfiYAxisValues = [0.0, 0.001, 0.002, 0.003, 0.004];
+    // double mfYMin = double.infinity;
+    // double mfYMax = double.negativeInfinity;
+
+    // for (SensorValue v in mfValues){
+    //   if(v.value < mfYMin) mfYMin = v.value;
+    //   if(v.value > mfYMax) mfYMax = v.value;
+    // }
+
+    // double diff = mfYMax - mfYMin;
+
+    // // Safely generate the Y-axis values for the MFI chart
+    // List<double> mfiYAxisValues = [mfYMin - diff * 0.25, mfYMin, mfYMin + diff * 0.25, mfYMax - diff * 0.25, mfYMax, mfYMax + diff * 0.25];
+
+   List<double> generateMfYAxisValues(List<SensorValue> values) {
+    if (values.isEmpty) return [];
+
+    // Find min and max
+    double min = values.first.value;
+    double max = values.first.value;
+
+    for (var v in values) {
+      if (v.value < min) min = v.value;
+      if (v.value > max) max = v.value;
     }
+
+    double diff = max - min;
+
+    // Handle case when all values are the same (avoid 0 diff)
+    if (diff == 0) diff = max == 0 ? 1 : max.abs() * 0.1;
+
+    List<double> axisValues = [
+      min - diff * 0.25,
+      min,
+      min + diff * 0.25,
+      min + diff * 0.5,
+      min + diff * 0.75,
+      max,
+      max + diff * 0.25,
+    ];
+
+    // Round to 8 decimal places
+    axisValues = axisValues.map((v) => double.parse(v.toStringAsFixed(8))).toList();
+    return axisValues;
+  }
+
+
+    List<double> mfiYAxisValues = generateMfYAxisValues(mfValues);
+
 
     final mfiChart = pw.Chart(
       grid: pw.CartesianGrid(
-        xAxis: pw.FixedAxis(mfiXAxisValues, divisions: true),
+        xAxis: pw.FixedAxis(mfiXAxisValues.map((v) => double.parse(v.toStringAsFixed(2))).toList(), divisions: true),
         yAxis: pw.FixedAxis(mfiYAxisValues, divisions: true),
       ),
       datasets: [
         pw.LineDataSet(
           legend: 'Muscle Fatigue Index',
           drawSurface: false,
-          isCurved: true,
-          drawPoints: false,
+          isCurved: false,
+          drawPoints: true,
           color: baseColor,
           data: mfiPoints,
         ),
@@ -124,31 +188,34 @@ class PdfService {
     // Add a single page with text + charts
     document.addPage(
       pw.Page(
-        pageFormat: PdfPageFormat(pageWidth, chartHeight * 2 + 150),
+        pageFormat: PdfPageFormat(pageWidth, chartHeight * 3 + 150),
         theme: theme,
         build: (context) {
-          return pw.Column(
-            crossAxisAlignment: pw.CrossAxisAlignment.start,
-            children: [
-              pw.Text('User Report', style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
-              pw.SizedBox(height: 10),
-              pw.Text('User ID: $userId', style: pw.TextStyle(fontSize: 12)),
-              pw.Text('Gender: $gender', style: pw.TextStyle(fontSize: 12)),
-              pw.Text('Age: $age years', style: pw.TextStyle(fontSize: 12)),
-              pw.Text('Height: $height cm', style: pw.TextStyle(fontSize: 12)),
-              pw.Text('Weight: $weight kg', style: pw.TextStyle(fontSize: 12)),
-              pw.Text('Muscle Fatigue Threshold: ${threshold.toStringAsFixed(2)}', style: pw.TextStyle(fontSize: 12)),
-              pw.SizedBox(height: 20),
+          return pw.Padding(
+            padding: const pw.EdgeInsets.all(20),
+              child: pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Text('User Report', style: pw.TextStyle(fontSize: 18, fontWeight: pw.FontWeight.bold)),
+                pw.SizedBox(height: 10),
+                pw.Text('User ID: $userId', style: pw.TextStyle(fontSize: 12)),
+                pw.Text('Gender: $gender', style: pw.TextStyle(fontSize: 12)),
+                pw.Text('Age: $age years', style: pw.TextStyle(fontSize: 12)),
+                pw.Text('Height: $height cm', style: pw.TextStyle(fontSize: 12)),
+                pw.Text('Weight: $weight kg', style: pw.TextStyle(fontSize: 12)),
+                pw.Text('Muscle Fatigue Threshold: ${threshold.toString()}', style: pw.TextStyle(fontSize: 12)),
+                pw.SizedBox(height: 20),
 
-              // EMG graph
-              pw.Text('EMG Signal (First Point: $firstEmgTime s, Last Point: $lastEmgTime s)', style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
-              pw.SizedBox(height: chartHeight, child: emgChart),
-              pw.SizedBox(height: 20),
+                // EMG graph
+                pw.Text('EMG Signal (First Point: $firstEmgTime s, Last Point: $lastEmgTime s)', style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
+                pw.SizedBox(height: chartHeight, child: emgChart),
+                pw.SizedBox(height: 20),
 
-              // MFI graph
-              pw.Text('Muscle Fatigue Variation (First Point: $firstMfiTime s, Last Point: $lastMfiTime s)', style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
-              pw.SizedBox(height: chartHeight, child: mfiChart),
-            ],
+                // MFI graph
+                pw.Text('Muscle Fatigue Variation (First Point: $firstMfiTime s, Last Point: $lastMfiTime s)', style: pw.TextStyle(fontSize: 14, fontWeight: pw.FontWeight.bold)),
+                pw.SizedBox(height: chartHeight, child: mfiChart),
+              ],
+            )
           );
         },
       ),
@@ -158,19 +225,43 @@ class PdfService {
   }
 
   /// Share PDF
+  // Future<void> sharePdf(Uint8List pdfData, String filename) async {
+  //   final dir = await getTemporaryDirectory();
+  //   final file = File('${dir.path}/$filename.pdf');
+  //   await file.writeAsBytes(pdfData);
+
+  //   final params = ShareParams(
+  //     files: [XFile(file.path)],
+  //   );
+
+  //   final result = await SharePlus.instance.share(params);
+
+  //   if (result.status == ShareResultStatus.success) {
+  //     print('Sharing Done');
+  //   }
+  // }
   Future<void> sharePdf(Uint8List pdfData, String filename) async {
     final dir = await getTemporaryDirectory();
     final file = File('${dir.path}/$filename.pdf');
     await file.writeAsBytes(pdfData);
 
-    final params = ShareParams(
-      files: [XFile(file.path)],
-    );
+    if (defaultTargetPlatform == TargetPlatform.windows) {
+      final result = await OpenFile.open(file.path);
+      if (result.type == ResultType.done) {
+        print('PDF opened successfully.');
+      } else {
+        print('Failed to open PDF: ${result.message}');
+      }
+    } else {
+      final params = ShareParams(
+        files: [XFile(file.path)],
+      );
 
-    final result = await SharePlus.instance.share(params);
+      final result = await SharePlus.instance.share(params);
 
-    if (result.status == ShareResultStatus.success) {
-      print('Sharing Done');
+      if (result.status == ShareResultStatus.success) {
+        print('Sharing Done');
+      }
     }
   }
 }

@@ -55,9 +55,12 @@ class UserScreen extends StatelessWidget {
             if(user.readings.isNotEmpty)
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
-              child: SizedBox(
-                width: (user.readings.last.timestamp.inSeconds - user.readings.first.timestamp.inSeconds) * 50 + 50,
-                child: EmgGraph(sensorValues: user.readings, timeStamp: user.readings.last.timestamp, lastvalues: false,)
+              child: Padding(
+                padding: const EdgeInsets.only(left: 20.0),
+                child: SizedBox(
+                  width: (user.readings.last.timestamp.inSeconds - user.readings.first.timestamp.inSeconds) * 50 + 50,
+                  child: EmgGraph(sensorValues: user.readings, timeStamp: user.readings.last.timestamp, lastvalues: false,)
+                ),
               )
             ),
 
@@ -69,9 +72,12 @@ class UserScreen extends StatelessWidget {
             if(user.mfSeries.isNotEmpty)
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
-              child: SizedBox(
-                width: (user.mfSeries.last.timestamp.inSeconds - user.mfSeries.first.timestamp.inSeconds) * 50 + 50,
-                child: EmgGraph(sensorValues: user.mfSeries, timeStamp: user.mfSeries.last.timestamp, lastvalues: false, maximumY: maxMFY,)
+              child: Padding(
+                padding: const EdgeInsets.only(left: 20.0),
+                child: SizedBox(
+                  width: (user.mfSeries.last.timestamp.inSeconds - user.mfSeries.first.timestamp.inSeconds) * 50 + 50,
+                  child: EmgGraph(sensorValues: user.mfSeries, timeStamp: user.mfSeries.last.timestamp, lastvalues: false, maximumY: maxMFY,)
+                ),
               )
             ),
         
